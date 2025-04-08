@@ -36,6 +36,9 @@
         }
 
         const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbljLFir53HciSZV7oAYUXGr-LUApBCtc0nc8iVePWJ41QNYUqGrsaXNQ7Lzxl2cA3eCXqHxRG2TbH/pub?output=csv";
+        let map;
+        let routeLine;
+        let markers = [];
 
         async function loadMapData() {
             const response = await fetch(csvUrl);
@@ -53,28 +56,37 @@
                 }
             });
 
-            const map = L.map('map').setView(coordinates[0], 9);
+            if (!map) {
+                map = L.map('map').setView(coordinates[0], 9);
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+            }
 
-            const routeLine = L.polyline(coordinates, { color: 'blue' }).addTo(map);
+            // Remove previous markers and line
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            if (routeLine) map.removeLayer(routeLine);
+
+            routeLine = L.polyline(coordinates, { color: 'blue' }).addTo(map);
 
             coordinates.forEach((coord, i) => {
-                L.circleMarker(coord, {
+                const marker = L.circleMarker(coord, {
                     radius: 4,
                     fillColor: 'red',
                     color: 'black',
                     weight: 1,
                     fillOpacity: 0.8
                 }).addTo(map).bindTooltip(`Taškas ${i + 1}`);
+                markers.push(marker);
             });
 
             map.fitBounds(routeLine.getBounds());
         }
 
         loadMapData();
+        setInterval(loadMapData, 60000); // atnaujinimas kas 60 sekundžių
     </script>
 </body>
 </html>
