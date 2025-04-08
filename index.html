@@ -35,12 +35,13 @@
                 .catch(err => console.error('Service Worker registration failed', err));
         }
 
-        const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbljLFir53HciSZV7oAYUXGr-LUApBCtc0nc8iVePWJ41QNYUqGrsaXNQ7Lzxl2cA3eCXqHxRG2TbH/pub?output=csv";
+        const csvBaseUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbljLFir53HciSZV7oAYUXGr-LUApBCtc0nc8iVePWJ41QNYUqGrsaXNQ7Lzxl2cA3eCXqHxRG2TbH/pub?output=csv";
         let map;
         let routeLine;
         let markers = [];
 
         async function loadMapData() {
+            const csvUrl = `${csvBaseUrl}&t=${Date.now()}`; // pridedame timestamp, kad isvengtume cache
             const response = await fetch(csvUrl);
             const text = await response.text();
 
