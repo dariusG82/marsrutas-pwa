@@ -50,8 +50,8 @@
 
             rows.forEach(row => {
                 const cols = row.split(',');
-                const lat = parseFloat(cols[1]);
-                const lon = parseFloat(cols[2]);
+                const lat = parseFloat(cols[0]);
+                const lon = parseFloat(cols[1]);
                 if (!isNaN(lat) && !isNaN(lon)) {
                     coordinates.push([lat, lon]);
                 }
