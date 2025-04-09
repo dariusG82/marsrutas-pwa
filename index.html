@@ -7,7 +7,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <title>Maršrutas: Marijampolė – Kaunas (iš Google Sheets)</title>
+    <title>Maršrutas iš Google Sheets</title>
     <style>
         body { margin: 0; font-family: sans-serif; }
         #map {
@@ -24,7 +24,7 @@
 </head>
 <body>
     <header>
-        <h2>Maršrutas: Marijampolė – Kaunas (50 taškų iš Google Sheets)</h2>
+        <h2>Maršrutas - 50 taškų iš Google Sheets)</h2>
     </header>
     <div id="map"></div>
 
@@ -35,7 +35,7 @@
                 .catch(err => console.error('Service Worker registration failed', err));
         }
 
-        const csvBaseUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbljLFir53HciSZV7oAYUXGr-LUApBCtc0nc8iVePWJ41QNYUqGrsaXNQ7Lzxl2cA3eCXqHxRG2TbH/pub?output=csv";
+        const csvBaseUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRMpwq9Aoi39nCpHCBSiK4VMIMLLUlbxkRQTM3EzC8BzmqpwvUfRUns9f9iKFo6V9lDNCHyJ2VEP0KX/pub?gid=519163019&single=true&output=csv";
         let map;
         let routeLine;
         let markers = [];
@@ -87,7 +87,7 @@
         }
 
         loadMapData();
-        setInterval(loadMapData, 60000); // atnaujinimas kas 60 sekundžių
+        setInterval(loadMapData, 20000); // atnaujinimas kas 20 sekundžių
     </script>
 </body>
 </html>
