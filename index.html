@@ -24,7 +24,7 @@
 </head>
 <body>
     <header>
-        <h2>Maršrutas (iki 50 taškų iš Google Sheets)</h2>
+        <h2>Maršrutas: Marijampolė – Kaunas (50 taškų iš Google Sheets)</h2>
     </header>
     <div id="map"></div>
 
@@ -41,68 +41,69 @@
         let markers = [];
 
         async function loadMapData() {
-            const csvUrl = `${csvBaseUrl}&t=${Date.now()}`;
-            const response = await fetch(csvUrl, { cache: "no-cache" });
-            const text = await response.text();
+            try {
+                const csvUrl = `${csvBaseUrl}&t=${Date.now()}`; // Pridėti timestamp'ą, kad apeiti cache
+                const response = await fetch(csvUrl, { cache: "no-cache" });
+                const text = await response.text();
 
-            const rows = text.trim().split('\n').slice(1);
-            const coordinates = [];
+                const rows = text.trim().split('\n').slice(1);
+                const coordinates = [];
 
-            rows.forEach(row => {
-                const cols = row.split(',');
-                const lat = parseFloat(cols[1]?.trim().replace(/"/g, ''));
-                const lon = parseFloat(cols[2]?.trim().replace(/"/g, ''));
-                if (!isNaN(lat) && !isNaN(lon)) {
-                    coordinates.push([lat, lon]);
+                rows.forEach(row => {
+                    const cols = row.split(',');
+                    const lat = parseFloat(cols[1]?.trim().replace(/"/g, ''));
+                    const lon = parseFloat(cols[2]?.trim().replace(/"/g, ''));
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        coordinates.push([lat, lon]);
+                    }
+                });
+
+                if (coordinates.length === 0) {
+                    console.error("Nėra galiojančių koordinačių!");
+                    return;
                 }
-            });
 
-            if (!map) {
-                map = L.map('map').setView(coordinates[0], 9);
+                if (!map) {
+                    map = L.map('map').setView(coordinates[0], 9);
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
-            }
-
-            // Pašalinti senus elementus iš karto
-            if (routeLine) {
-                map.removeLayer(routeLine);
-                routeLine = null;
-            }
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
-
-            // Sukurti naują maršrutą ir žymeles
-            routeLine = L.polyline([], { color: 'blue' }).addTo(map);
-
-            let step = 0;
-            const animationSteps = coordinates.length;
-            const animationInterval = setInterval(() => {
-                if (step < animationSteps) {
-                    routeLine.addLatLng(coordinates[step]);
-                    step++;
-                } else {
-                    clearInterval(animationInterval);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
                 }
-            }, 30); // animacijos greitis
 
-            coordinates.forEach((coord, i) => {
-                const marker = L.circleMarker(coord, {
-                    radius: 4,
-                    fillColor: 'red',
-                    color: 'black',
-                    weight: 1,
-                    fillOpacity: 0.8
-                }).addTo(map).bindTooltip(`Taškas ${i + 1}`);
-                markers.push(marker);
-            });
+                // Pašalinti senus maršrutus ir žymeklius
+                if (routeLine) {
+                    map.removeLayer(routeLine);
+                    routeLine = null;
+                }
+                markers.forEach(m => map.removeLayer(m));
+                markers = [];
 
-            map.fitBounds(L.latLngBounds(coordinates));
+                // Nubraižyti naują maršrutą
+                routeLine = L.polyline(coordinates, { color: 'blue' }).addTo(map);
+
+                // Nubraižyti žymeklius
+                coordinates.forEach((coord, i) => {
+                    const marker = L.circleMarker(coord, {
+                        radius: 4,
+                        fillColor: 'red',
+                        color: 'black',
+                        weight: 1,
+                        fillOpacity: 0.8
+                    }).addTo(map).bindTooltip(`Taškas ${i + 1}`);
+                    markers.push(marker);
+                });
+
+                // Pritaikyti matymo ribas
+                map.fitBounds(routeLine.getBounds());
+
+            } catch (error) {
+                console.error("Klaida kraunant duomenis:", error);
+            }
         }
 
-        loadMapData();
-        setInterval(loadMapData, 15000); // atnaujinimas kas 60 sekundžių
+        loadMapData(); // Pirmas įkėlimas
+        setInterval(loadMapData, 60000); // Kas 60 sekundžių tikrinam ir atnaujinam
     </script>
 </body>
 </html>
