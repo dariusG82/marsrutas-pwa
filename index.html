@@ -7,7 +7,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <title>Maršrutas: Marijampolė – Kaunas (iš Google Sheets)</title>
+    <title>Kelionės maršrutas</title>
     <style>
         body { margin: 0; font-family: sans-serif; }
         #map {
@@ -42,7 +42,7 @@
 
         async function loadMapData() {
             try {
-                const csvUrl = `${csvBaseUrl}&t=${Date.now()}`; // Pridėti timestamp'ą, kad apeiti cache
+                const csvUrl = `${csvBaseUrl}&t=${Date.now()}`;
                 const response = await fetch(csvUrl, { cache: "no-cache" });
                 const text = await response.text();
 
@@ -71,7 +71,6 @@
                     }).addTo(map);
                 }
 
-                // Pašalinti senus maršrutus ir žymeklius
                 if (routeLine) {
                     map.removeLayer(routeLine);
                     routeLine = null;
@@ -79,10 +78,8 @@
                 markers.forEach(m => map.removeLayer(m));
                 markers = [];
 
-                // Nubraižyti naują maršrutą
                 routeLine = L.polyline(coordinates, { color: 'blue' }).addTo(map);
 
-                // Nubraižyti žymeklius
                 coordinates.forEach((coord, i) => {
                     const marker = L.circleMarker(coord, {
                         radius: 4,
@@ -94,7 +91,6 @@
                     markers.push(marker);
                 });
 
-                // Pritaikyti matymo ribas
                 map.fitBounds(routeLine.getBounds());
 
             } catch (error) {
@@ -102,8 +98,8 @@
             }
         }
 
-        loadMapData(); // Pirmas įkėlimas
-        setInterval(loadMapData, 60000); // Kas 60 sekundžių tikrinam ir atnaujinam
+        loadMapData();
+        setInterval(loadMapData, 15000); // atnaujinimas kas 15 sekundžių
     </script>
 </body>
 </html>
