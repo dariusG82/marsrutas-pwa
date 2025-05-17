@@ -10,16 +10,8 @@
     <title>Kelionės maršrutas</title>
     <style>
         body { margin: 0; font-family: sans-serif; }
-        #map {
-            height: 90vh;
-            width: 100%;
-        }
-        header {
-            padding: 1rem;
-            background: #1976d2;
-            color: white;
-            text-align: center;
-        }
+        #map { height: 90vh; width: 100%; }
+        header { padding: 1rem; background: #1976d2; color: white; text-align: center; }
     </style>
 </head>
 <body>
@@ -52,11 +44,12 @@
 
                 rows.forEach(row => {
                     const cols = row.split(',');
-                    const lat = parseFloat(cols[1]?.trim().replace(/"/g, ''));
-                    const lon = parseFloat(cols[2]?.trim().replace(/"/g, ''));
-                    const info = cols[3]?.trim().replace(/"/g, ''); // papildomas stulpelis
+                    const id   = cols[0]?.trim().replace(/\"/g, '');
+                    const lat  = parseFloat(cols[1]?.trim().replace(/\"/g, ''));
+                    const lon  = parseFloat(cols[2]?.trim().replace(/\"/g, ''));
+                    const info = cols[3]?.trim().replace(/\"/g, ''); // papildomas stulpelis
                     if (!isNaN(lat) && !isNaN(lon)) {
-                        data.push({ lat, lon, info });
+                        data.push({ id, lat, lon, info });
                     }
                 });
 
@@ -85,8 +78,8 @@
                 const coordinates = data.map(item => [item.lat, item.lon]);
                 routeLine = L.polyline(coordinates, { color: 'blue' }).addTo(map);
 
-                // Pridėti markerius su informacija iš papildomo stulpelio
-                data.forEach((item, i) => {
+                // Pridėti markerius su ID ir informacija
+                data.forEach(item => {
                     const marker = L.circleMarker([item.lat, item.lon], {
                         radius: 4,
                         fillColor: 'red',
@@ -95,7 +88,7 @@
                         fillOpacity: 0.8
                     }).addTo(map)
                       .bindTooltip(
-                        `<strong>Taškas ${i + 1}</strong><br>${item.info}`,
+                        `<strong>${item.id}</strong><br>${item.info}`,
                         { permanent: true, direction: 'right' }
                       );
                     markers.push(marker);
