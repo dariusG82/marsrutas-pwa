@@ -46,31 +46,34 @@
                 const response = await fetch(csvUrl, { cache: "no-cache" });
                 const text = await response.text();
 
+                // Parsuoti CSV eilutes ir surinkti duomenis
                 const rows = text.trim().split('\n').slice(1);
-                const coordinates = [];
+                const data = [];
 
                 rows.forEach(row => {
                     const cols = row.split(',');
                     const lat = parseFloat(cols[1]?.trim().replace(/"/g, ''));
                     const lon = parseFloat(cols[2]?.trim().replace(/"/g, ''));
+                    const info = cols[3]?.trim().replace(/"/g, ''); // papildomas stulpelis
                     if (!isNaN(lat) && !isNaN(lon)) {
-                        coordinates.push([lat, lon]);
+                        data.push({ lat, lon, info });
                     }
                 });
 
-                if (coordinates.length === 0) {
+                if (data.length === 0) {
                     console.error("Nėra galiojančių koordinačių!");
                     return;
                 }
 
+                // Žemėlapio inicializavimas
                 if (!map) {
-                    map = L.map('map').setView(coordinates[0], 9);
-
+                    map = L.map('map').setView([data[0].lat, data[0].lon], 9);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; OpenStreetMap contributors'
                     }).addTo(map);
                 }
 
+                // Pašalinti senus sluoksnius
                 if (routeLine) {
                     map.removeLayer(routeLine);
                     routeLine = null;
@@ -78,16 +81,23 @@
                 markers.forEach(m => map.removeLayer(m));
                 markers = [];
 
+                // Brėžti maršrutą
+                const coordinates = data.map(item => [item.lat, item.lon]);
                 routeLine = L.polyline(coordinates, { color: 'blue' }).addTo(map);
 
-                coordinates.forEach((coord, i) => {
-                    const marker = L.circleMarker(coord, {
+                // Pridėti markerius su informacija iš papildomo stulpelio
+                data.forEach((item, i) => {
+                    const marker = L.circleMarker([item.lat, item.lon], {
                         radius: 4,
                         fillColor: 'red',
                         color: 'black',
                         weight: 1,
                         fillOpacity: 0.8
-                    }).addTo(map).bindTooltip(`Taškas ${i + 1}`);
+                    }).addTo(map)
+                      .bindTooltip(
+                        `<strong>Taškas ${i + 1}</strong><br>${item.info}`,
+                        { permanent: true, direction: 'right' }
+                      );
                     markers.push(marker);
                 });
 
